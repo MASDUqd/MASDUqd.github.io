@@ -1,3 +1,70 @@
 <!DOCTYPE html>
-
+<html>
+    <head> 
+        <style>
+        <script type="text/javascript">
+            var ws=null;
+            function setConnected(connected){
+                document.getElementById('connect').disabled=connected;
+                document.getElementById('disconnect').disabled = !connected;
+                document.getElementById('echo').disabled = !connected;
+            }
+            function connect(){
+                if("WebSocket" in window){
+                    ws=new WebSocket("ws://127.0.0.1:8080/WebSocket/WebSocket");
+                }
+                else{
+                    alert("你的浏览器不支持WebSocket,请选择高版本的浏览器!");return;
+                }
+                ws.onopen = function(){
+                    setConnected(true);
+                };
+                ws.onmessage= function(e){
+                    log("接收:"+e.data);
+                };
+                ws.onclose =function(){
+                    setConnected(false);
+                };
+            }
+            function disconnect(){
+                if(ws!=null){
+                    ws.close();
+                    ws=null;
+                }
+                setConnected(false);
+            }
+            function echo(){
+                if(ws!=null){
+                    var message = document.getElementById("message").value;
+                    log("发送:"+message);
+                    ws.send(message);
+                }
+                else{
+                    alert("未建立连接,请连接WebSocket");
+                }
+            }
+            function log(message){
+                var console = document.getElementById('console');
+                var p= document.createElement('p');
+                p.style.wordWrap='break-word';
+                p.appendChild(document.createTextNode(message));
+                console.appendChild(p);
+                while(console.childNodes.length>25){
+                    console.removeChild(console.firstChild);
+                }
+                console.scrollTop=console.scrollHeight;
+            }
+        </script>
+        </style>
+    </head>
+    <body>
+        <p>WebSocket Demo</p>
+        <input id="connect" type="button" value="连 接" onclick="connect();"/>
+        <input id="disconnect" type="button" disabled="disabled" value="断 开 连 接" onclick="disconnect();" />
+        <br>
+        <textarea id="message" style="Width:350px"></textarea>
+        <br>
+        <input id="echo" type="button" disabled="disabled" value="发 送" onclick="echo();" />
+        <div id="console"></div>
+    </body>
 </html>
